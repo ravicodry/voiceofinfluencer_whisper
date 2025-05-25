@@ -29,8 +29,9 @@ google-auth-httplib2==0.1.1
 # (make sure these exact versions actually exist on the CPU index;
 # if you still get ABI errors, either remove the '+cpu' suffix or
 # bump to a torch version that provides wheels for Python 3.13)
-faster-whisper==0.5.2
-ctranslate2==2.29.0
+
+faster-whisper>=0.4.0
+ctranslate2>=2.28.0
 openai-whisper==20231117
 typing-extensions>=4.7.1
 pydantic>=2.0.0
