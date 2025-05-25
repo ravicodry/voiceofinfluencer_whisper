@@ -1,3 +1,7 @@
+# Tell pip to also look at PyTorch’s public CPU wheel index,
+# but don’t override the default PyPI index.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Core requirements
 streamlit==1.24.0
 pandas==2.0.3
@@ -17,10 +21,12 @@ google-api-python-client==2.108.0
 google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
 
-# ML requirements
---index-url https://download.pytorch.org/whl/cpu
-torch==2.0.1+cpu
-torchaudio==2.0.1+cpu
+# ML requirements for deployment
+# (make sure these exact versions actually exist on the CPU index;
+# if you still get ABI errors, either remove the '+cpu' suffix or
+# bump to a torch version that provides wheels for Python 3.13)
+torch==2.1.0+cpu
+torchaudio==2.1.0+cpu
 openai-whisper==20231117
 typing-extensions>=4.7.1
 pydantic>=2.0.0
