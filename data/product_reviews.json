@@ -1,0 +1,50 @@
+[
+  {
+    "video_url": "https://www.youtube.com/watch?v=WuljKartv2U",
+    "video_title": "Samsung Z Flip 5 Review: I Was Wrong!",
+    "video_details": {
+      "title": "Samsung Z Flip 5 Review: I Was Wrong!",
+      "view_count": 5723771,
+      "like_count": 130411,
+      "comment_count": 5520,
+      "publish_date": "2023-08-09T19:10:14Z",
+      "engagement_rate": 2.37,
+      "is_trending": false,
+      "timestamp": 1748105841.7847476
+    },
+    "product_name": "s25",
+    "overall_sentiment": "positive",
+    "positive_keywords": [
+      "Snapdragon 8 Gen 2",
+      "Hinge",
+      "Cover screen",
+      "Flex window",
+      "Widgets",
+      "Fingerprint reader",
+      "Storage"
+    ],
+    "negative_keywords": [
+      "Battery life",
+      "Pixel count",
+      "Resolution",
+      "Refresh rate"
+    ],
+    "positive_frequencies": {
+      "Snapdragon 8 Gen 2": 2,
+      "Hinge": 10,
+      "Cover screen": 1,
+      "Flex window": 1,
+      "Widgets": 2,
+      "Fingerprint reader": 1,
+      "Storage": 1
+    },
+    "negative_frequencies": {
+      "Battery life": 3,
+      "Pixel count": 0,
+      "Resolution": 1,
+      "Refresh rate": 0
+    },
+    "summary": "SUMMARY:\nThe Z Flip 5 from Samsung has been discussed in detail, emphasizing three main differences: the chip, the hinge, and the new outside display. The chip features an overclocked Snapdragon 8 Gen 2 for improved performance but lacks enhanced battery life despite the new pixel count. The hinge design has been simplified, resulting in a more durable and flat folding mechanism. The biggest change is the larger outside screen, named the flex window, which offers more functionality and customizable app usage.\n\nPOSITIVE KEYWORDS:\n- Snapdragon 8 Gen 2 (improved performance)\n- Hinge (simplified design, durability)\n- Cover screen (larger, functional)\n- Flex window (increased screen size, improved functionality)\n- Widgets (optimized for outside screen usage)\n- Fingerprint reader (super fast)\n- Storage (increased from 128 to 256 gigs)\n\nNEGATIVE KEYWORDS:\n- Battery life (no improvement despite new chip)\n- Pixel count (slight visibility on the outside screen)\n- Resolution (720p on the outside screen)\n- Refresh rate (60Hz on the outside screen, not matching inside)",
+    "timestamp": "2025-05-24T22:27:24.951863"
+  }
+]

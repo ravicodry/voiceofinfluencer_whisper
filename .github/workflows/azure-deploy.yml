@@ -1,0 +1,105 @@
+name: Deploy to Azure
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install gunicorn
+    
+    - name: Debug directory contents
+      run: |
+        echo "Current directory contents:"
+        ls -la
+        echo "Current directory path:"
+        pwd
+    
+    - name: Create deployment package
+      run: |
+        echo "Creating deployment package..."
+        # Create deployment directory
+        mkdir -p deployment
+        
+        # List all files before copying
+        echo "Files in current directory:"
+        ls -la
+        
+        # Copy files with error checking
+        echo "Copying files..."
+        for file in app_new.py requirements.txt web.config packages.txt; do
+          if [ -f "$file" ]; then
+            echo "Copying $file"
+            cp "$file" deployment/
+          else
+            echo "Warning: $file not found"
+          fi
+        done
+        
+        # Copy src directory if it exists
+        if [ -d "src" ]; then
+          echo "Copying src directory"
+          cp -r src deployment/
+        else
+          echo "Warning: src directory not found"
+        fi
+        
+        # Create startup script
+        echo "Creating startup script..."
+        echo '#!/bin/bash' > deployment/startup.sh
+        echo 'cd /home/site/wwwroot' >> deployment/startup.sh
+        echo 'echo "Creating virtual environment..."' >> deployment/startup.sh
+        echo 'python -m venv antenv' >> deployment/startup.sh
+        echo 'source antenv/bin/activate' >> deployment/startup.sh
+        echo 'echo "Installing dependencies..."' >> deployment/startup.sh
+        echo 'python -m pip install --upgrade pip' >> deployment/startup.sh
+        echo 'pip install streamlit' >> deployment/startup.sh
+        echo 'pip install -r requirements.txt' >> deployment/startup.sh
+        echo 'pip install gunicorn' >> deployment/startup.sh
+        echo 'echo "Starting gunicorn..."' >> deployment/startup.sh
+        echo 'gunicorn --bind=0.0.0.0:8000 --timeout 600 app_new:app' >> deployment/startup.sh
+        chmod +x deployment/startup.sh
+        
+        # Create oryx-manifest.toml
+        echo "Creating oryx-manifest.toml..."
+        echo '[build]' > deployment/oryx-manifest.toml
+        echo 'python_version = "3.11"' >> deployment/oryx-manifest.toml
+        
+        # Show deployment directory contents
+        echo "Deployment directory contents:"
+        ls -la deployment/
+        
+        # Create zip file
+        cd deployment
+        zip -r ../deployment.zip .
+        cd ..
+        
+        # Verify zip file
+        echo "Created deployment.zip"
+        ls -la deployment.zip
+        if [ ! -f deployment.zip ]; then
+          echo "Error: deployment.zip was not created"
+          exit 1
+        fi
+    
+    - name: Deploy to Azure
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'youtube-product-analyzer'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: deployment.zip
+        app-type: 'webapp'
+        runtime: 'PYTHON|3.11'
+        startup-file: 'startup.sh' 
