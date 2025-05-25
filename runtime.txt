@@ -1,1 +1,2 @@
-python-3.10.13 
+python-3.10.13
+# Note: This version is required for compatibility with PyTorch CPU wheels 

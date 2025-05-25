@@ -17,8 +17,8 @@ google-api-python-client==2.108.0
 google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
 
-# ML requirements (install these separately)
---extra-index-url https://download.pytorch.org/whl/cpu
+# ML requirements
+--find-links https://download.pytorch.org/whl/torch_stable.html
 torch==2.1.0+cpu
 torchaudio==2.1.0+cpu
 openai-whisper==20231117
