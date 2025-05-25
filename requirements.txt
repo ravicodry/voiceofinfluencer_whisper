@@ -11,9 +11,11 @@ matplotlib==3.7.1
 python-dotenv==1.0.0
 openai==1.12.0
 supabase==2.3.0
-yt-dlp>=2024.3.10
+yt-dlp==2023.12.30
 protobuf==3.20.3
-google-api-python-client>=2.0.0
+google-api-python-client==2.108.0
+google-auth-oauthlib==1.1.0
+google-auth-httplib2==0.1.1
 
 # ML requirements (install these separately)
 --extra-index-url https://download.pytorch.org/whl/cpu
