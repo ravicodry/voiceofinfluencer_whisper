@@ -18,9 +18,9 @@ google-auth-oauthlib==1.1.0
 google-auth-httplib2==0.1.1
 
 # ML requirements
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch==2.1.0+cpu
-torchaudio==2.1.0+cpu
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.0.1+cpu
+torchaudio==2.0.1+cpu
 openai-whisper==20231117
 typing-extensions>=4.7.1
 pydantic>=2.0.0
