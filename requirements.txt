@@ -7,7 +7,7 @@
 # Core requirements
 streamlit==1.24.0
 pandas==2.0.3
-numpy>=1.25.0,<1.26.0
+numpy>=1.26.0,<1.27.0
 youtube-transcript-api==0.6.1
 requests==2.31.0
 nltk==3.8.1
