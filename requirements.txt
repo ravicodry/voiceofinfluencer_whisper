@@ -1,11 +1,13 @@
 # Tell pip to also look at PyTorch’s public CPU wheel index,
 # but don’t override the default PyPI index.
+--index-url https://pypi.org/simple
 --extra-index-url https://download.pytorch.org/whl/cpu
+
 
 # Core requirements
 streamlit==1.24.0
 pandas==2.0.3
-numpy==1.24.3
+numpy>=1.25.0,<1.26.0
 youtube-transcript-api==0.6.1
 requests==2.31.0
 nltk==3.8.1
