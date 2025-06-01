@@ -74,5 +74,110 @@
     "negative_frequencies": {},
     "summary": "SUMMARY:\nThe review focused on highlighting the exceptional performance and camera quality of the product while expressing disappointment in the battery life and design aspects.\n\nPOSITIVE KEYWORDS:\n- performance (exceptional)\n- camera quality (excellent)\n\nNEGATIVE KEYWORDS:\n- battery life (disappointing)\n- design aspects (underwhelming)",
     "timestamp": "2025-05-25T22:49:36.150496"
+  },
+  {
+    "video_url": "https://www.youtube.com/watch?v=VBfWLqCY_64&t=12s",
+    "video_title": "Galaxy Z Fold 6 - 3 Days Later - Pros & Cons!",
+    "video_details": {
+      "title": "Galaxy Z Fold 6 - 3 Days Later - Pros & Cons!",
+      "view_count": 50257,
+      "like_count": 1142,
+      "comment_count": 221,
+      "publish_date": "2024-07-22T13:30:21Z",
+      "engagement_rate": 2.71,
+      "is_trending": false,
+      "timestamp": 1748799579.1760843
+    },
+    "product_name": "fold 6",
+    "overall_sentiment": "positive",
+    "positive_keywords": [
+      "design",
+      "cover display",
+      "chassis",
+      "weight",
+      "brightness",
+      "colors",
+      "media consumption",
+      "speakers",
+      "Snapdragon 8 gen 3",
+      "software",
+      "AI features",
+      "cameras",
+      "photo quality"
+    ],
+    "negative_keywords": [
+      "price increase",
+      "speaker positioning",
+      "battery capacity",
+      "screen on time",
+      "efficiency of Snapdragon 8 Generation 3"
+    ],
+    "positive_frequencies": {
+      "design": 4,
+      "cover display": 2,
+      "chassis": 1,
+      "weight": 1,
+      "brightness": 4,
+      "colors": 2,
+      "media consumption": 1,
+      "speakers": 6,
+      "Snapdragon 8 gen 3": 3,
+      "software": 4,
+      "AI features": 1,
+      "cameras": 5,
+      "photo quality": 1
+    },
+    "negative_frequencies": {
+      "screen on time": 1
+    },
+    "summary": "SUMMARY:\nThe reviewer discussed the Galaxy Z Fold 6's design improvements, including a wider cover display, matte chassis, decreased weight, increased brightness, vibrant colors, enhanced media consumption experience, improved speakers with Dolby Atmos, Snapdragon 8 gen 3 efficiency, software usability enhancements, advanced AI features, camera upgrades (larger ultrawide sensor), impressive photo quality, and battery life expectations.\n\nPOSITIVE KEYWORDS:\n- design\n- cover display\n- chassis\n- weight\n- brightness\n- colors\n- media consumption\n- speakers\n- Snapdragon 8 gen 3\n- software\n- AI features\n- cameras\n- photo quality\n\nNEGATIVE KEYWORDS:\n- price increase\n- speaker positioning\n- battery capacity\n- screen on time\n- efficiency of Snapdragon 8 Generation 3",
+    "timestamp": "2025-06-01T23:09:42.328220"
+  },
+  {
+    "video_url": "https://www.youtube.com/watch?v=Sre3GUuh_fI",
+    "video_title": "Galaxy Z Fold 6 Review | Pros and Cons of a Power User",
+    "video_details": {
+      "title": "Galaxy Z Fold 6 Review | Pros and Cons of a Power User",
+      "view_count": 4004,
+      "like_count": 1736,
+      "comment_count": 9,
+      "publish_date": "2024-11-23T17:00:31Z",
+      "engagement_rate": 43.58,
+      "is_trending": false,
+      "timestamp": 1748799679.553065
+    },
+    "product_name": "fold 6",
+    "overall_sentiment": "positive",
+    "positive_keywords": [
+      "multitasking",
+      "screen",
+      "speakers",
+      "S Pen",
+      "durability"
+    ],
+    "negative_keywords": [
+      "cameras",
+      "battery",
+      "screens",
+      "aspect ratio",
+      "IP rating",
+      "performance"
+    ],
+    "positive_frequencies": {
+      "multitasking": 4,
+      "screen": 15,
+      "speakers": 2,
+      "S Pen": 5,
+      "durability": 1
+    },
+    "negative_frequencies": {
+      "cameras": 5,
+      "battery": 2,
+      "screens": 2,
+      "aspect ratio": 1,
+      "performance": 1
+    },
+    "summary": "SUMMARY:\nThe Galaxy Z Fold 6 is discussed in detail, focusing on its advantages and trade-offs compared to traditional non-folding smartphones. The review highlights the device's multitasking capabilities, camera quality, sound speakers, screen real estate, battery life, screen reflections, hinge functionality, S Pen, and overall performance.\n\nPOSITIVE KEYWORDS:\n- multitasking\n- screen\n- speakers\n- S Pen\n- durability\n\nNEGATIVE KEYWORDS:\n- cameras\n- battery\n- screens\n- aspect ratio\n- IP rating\n- performance",
+    "timestamp": "2025-06-01T23:11:21.835285"
   }
 ]
