@@ -1,5 +1,5 @@
 from youtube_transcript_api import YouTubeTranscriptApi
-from youtube_transcript_api._errors import NoTranscriptFound, VideoUnavailable
+from youtube_transcript_api._errors import NoTranscriptFound, VideoUnavailable, TranscriptsDisabled
 import re
 import requests
 import os
@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from functools import lru_cache
 import time
 import logging
+import json
+from datetime import datetime, timedelta
 
 load_dotenv()  # Load environment variables from .env
 
@@ -16,6 +18,10 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Cache for storing successful transcript retrievals
+transcript_cache = {}
+CACHE_DURATION = timedelta(hours=24)  # Cache duration of 24 hours
 
 def extract_video_id(youtube_url):
     pattern = r"(?:v=|\/)([0-9A-Za-z_-]{11}).*"
@@ -29,31 +35,51 @@ def get_transcript(video_url, max_retries=3):
     if not video_id:
         return None, "❌ Invalid YouTube URL"
 
-    # Create a persistent session
+    # Check cache first
+    if video_id in transcript_cache:
+        cache_entry = transcript_cache[video_id]
+        if datetime.now() - cache_entry['timestamp'] < CACHE_DURATION:
+            return cache_entry['transcript'], None
+
+    # Create a persistent session with proper headers
     session = requests.Session()
-    
-    # Set up headers to mimic a browser
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
         'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Cache-Control': 'max-age=0'
     }
     session.headers.update(headers)
 
     def try_get_transcript(method="standard", cookies=None):
         try:
             if method == "standard":
-                return YouTubeTranscriptApi.get_transcript(video_id, languages=['en']), None
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+                return transcript, None
             elif method == "any_language":
-                return YouTubeTranscriptApi.get_transcript(video_id), None
+                transcript = YouTubeTranscriptApi.get_transcript(video_id)
+                return transcript, None
             elif method == "with_cookies":
-                return YouTubeTranscriptApi.get_transcript(video_id, languages=['en'], cookies=cookies), None
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'], cookies=cookies)
+                return transcript, None
             elif method == "with_cookies_any_language":
-                return YouTubeTranscriptApi.get_transcript(video_id, cookies=cookies), None
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, cookies=cookies)
+                return transcript, None
         except NoTranscriptFound:
             return None, "NoTranscriptFound"
         except VideoUnavailable:
             return None, "VideoUnavailable"
+        except TranscriptsDisabled:
+            return None, "TranscriptsDisabled"
         except Exception as e:
+            logger.error(f"Error in try_get_transcript: {str(e)}")
             return None, str(e)
 
     # Try different methods with retries
@@ -62,9 +88,16 @@ def get_transcript(video_url, max_retries=3):
         ("any_language", None),
     ]
 
-    # Get fresh cookies
+    # Get fresh cookies and session data
     try:
-        response = session.get("https://www.youtube.com")
+        # First visit YouTube homepage
+        session.get("https://www.youtube.com")
+        time.sleep(1)  # Small delay
+        
+        # Then visit the specific video
+        session.get(f"https://www.youtube.com/watch?v={video_id}")
+        time.sleep(1)  # Small delay
+        
         cookies = session.cookies.get_dict()
         formatted_cookies = ";".join([f"{k}={v}" for k, v in cookies.items()])
         methods.extend([
@@ -74,22 +107,32 @@ def get_transcript(video_url, max_retries=3):
     except Exception as e:
         logger.warning(f"Failed to get cookies: {str(e)}")
 
-    # Try each method with retries
+    # Try each method with exponential backoff
     for method, cookies in methods:
         for attempt in range(max_retries):
             logger.info(f"Attempt {attempt + 1}/{max_retries} using method: {method}")
             
+            # Exponential backoff
+            if attempt > 0:
+                time.sleep(2 ** attempt)
+            
             transcript, error = try_get_transcript(method, cookies)
             
             if transcript:
+                # Cache the successful result
+                transcript_cache[video_id] = {
+                    'transcript': transcript,
+                    'timestamp': datetime.now()
+                }
                 return transcript, None
             
             if error == "VideoUnavailable":
                 return None, "❌ This video is unavailable or private."
+            elif error == "TranscriptsDisabled":
+                return None, "❌ Transcripts are disabled for this video."
             
             if error != "NoTranscriptFound":
                 logger.warning(f"Error on attempt {attempt + 1}: {error}")
-                time.sleep(1)  # Wait before retry
                 continue
 
     return None, "❌ No transcript available for this video. Please try a different video."

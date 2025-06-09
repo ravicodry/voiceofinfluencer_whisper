@@ -233,5 +233,61 @@
     },
     "summary": "SUMMARY:\nThe Galaxy Z Fold 6 review emphasizes several key positive and negative aspects of the device. The review covers details about the design, display brightness, speaker quality, processor performance, software features, camera capabilities, and battery life analysis.\n\nPOSITIVE KEYWORDS:\n- Galaxy Z Fold 6\n- Design\n- Display\n- Brightness\n- Speaker\n- Processor\n- Software\n- Camera\n- Quality\n- Performance\n- Battery\n\nNEGATIVE KEYWORDS:\n- Price\n- Weight\n- Speaker alignment\n- Battery efficiency\n- Camera sensor upgrades\n- Battery capacity\n",
     "timestamp": "2025-06-02T11:29:56.574245"
+  },
+  {
+    "video_url": "https://www.youtube.com/watch?v=BaLvCe7ey9M",
+    "video_title": "Samsung TV Vision AI QLED Review \u2013 Great visuals but...",
+    "video_details": {
+      "title": "Samsung TV Vision AI QLED Review \u2013 Great visuals but...",
+      "view_count": 7544,
+      "like_count": 128,
+      "comment_count": 39,
+      "publish_date": "2025-06-01T05:30:06Z",
+      "engagement_rate": 2.21,
+      "is_trending": false,
+      "timestamp": 1749485975.4990792
+    },
+    "product_name": "Qled_tv",
+    "overall_sentiment": "positive",
+    "positive_keywords": [
+      "Picture quality",
+      "Color vibrancy",
+      "Deep blacks",
+      "Samsung TV Plus",
+      "Connectivity options",
+      "Build quality",
+      "AI processor",
+      "Upscaling",
+      "Personalized content discovery"
+    ],
+    "negative_keywords": [
+      "Sound output",
+      "Audio quality",
+      "Remote control",
+      "Usability",
+      "Voice control",
+      "Soundbar",
+      "Connectivity limitations",
+      "Usability constraints",
+      "Tyson OS"
+    ],
+    "positive_frequencies": {
+      "Picture quality": 8,
+      "Samsung TV Plus": 1,
+      "Build quality": 1,
+      "AI processor": 1,
+      "Upscaling": 2,
+      "Personalized content discovery": 1
+    },
+    "negative_frequencies": {
+      "Sound output": 1,
+      "Audio quality": 3,
+      "Usability": 4,
+      "Voice control": 1,
+      "Soundbar": 2,
+      "Tyson OS": 3
+    },
+    "summary": "SUMMARY:\nThe review focused on the Samsung Vision AI QLED TV, highlighting key aspects such as picture quality, audio quality, usability, connectivity, and build quality. The TV was commended for its impressive picture quality, including color vibrancy and deep blacks. However, the audio quality was considered adequate for small rooms but lacking for larger spaces, suggesting the addition of a soundbar for an enhanced experience. Usability aspects, including the Tyson OS, remote control, and lack of voice control, were seen as areas for improvement. Connectivity options, such as HDMI and USB ports, were noted, along with the availability of Samsung TV Plus for free content. The TV's build quality, design, and AI features, such as upscaling and personalized content discovery, were also discussed.\n\nPOSITIVE KEYWORDS:\n- Picture quality\n- Color vibrancy\n- Deep blacks\n- Samsung TV Plus\n- Connectivity options\n- Build quality\n- AI processor\n- Upscaling\n- Personalized content discovery\n\nNEGATIVE KEYWORDS:\n- Sound output\n- Audio quality\n- Remote control\n- Usability\n- Voice control\n- Soundbar\n- Connectivity limitations\n- Usability constraints\n- Tyson OS\n",
+    "timestamp": "2025-06-09T21:49:39.073995"
   }
 ]

@@ -53,10 +53,10 @@ def aggregate_product_metrics(df):
 def track_video_changes(df):
     """Track changes in metrics for the same video over time."""
     # Group by video title and sort by analysis date
-    video_changes = df.sort_values('analysis_date').groupby('video_title')
+    video_changes = df.sort_values('analysis_date').groupby(['video_title', 'product_name'])
     
     changes_data = []
-    for video_title, group in video_changes:
+    for (video_title, product_name), group in video_changes:
         if len(group) > 1:  # Only process videos with multiple analyses
             # Calculate changes between consecutive analyses
             for i in range(1, len(group)):
@@ -66,7 +66,7 @@ def track_video_changes(df):
                 # Calculate absolute and percentage changes
                 changes = {
                     'video_title': video_title,
-                    'product_name': curr['product_name'],
+                    'product_name': product_name,
                     'analysis_date': curr['analysis_date'],
                     'days_since_previous': (curr['analysis_date'] - prev['analysis_date']).days,
                     'views_change': curr['view_count'] - prev['view_count'],
@@ -124,24 +124,69 @@ def analyze_video_trends(data):
         
         # Engagement metrics over time
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df['publish_date'], y=df['view_count'], 
-                                name='Views', mode='lines+markers'))
-        fig.add_trace(go.Scatter(x=df['publish_date'], y=df['like_count'], 
-                                name='Likes', mode='lines+markers'))
-        fig.add_trace(go.Scatter(x=df['publish_date'], y=df['comment_count'], 
-                                name='Comments', mode='lines+markers'))
         
-        fig.update_layout(title='Engagement Metrics Over Time',
-                         xaxis_title='Date',
-                         yaxis_title='Count',
-                         hovermode='x unified')
-        st.plotly_chart(fig)
+        # Group by product to show metrics
+        for product in df['product_name'].unique():
+            product_data = df[df['product_name'] == product]
+            
+            # Add engagement rate line
+            fig.add_trace(go.Scatter(
+                x=product_data['publish_date'],
+                y=product_data['engagement_rate'],
+                name=f'{product} - Engagement Rate',
+                mode='lines+markers',
+                marker=dict(size=10)
+            ))
+        
+        fig.update_layout(
+            title='Engagement Rate Over Time by Product',
+            xaxis_title='Date',
+            yaxis_title='Engagement Rate (%)',
+            hovermode='x unified',
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
         # Engagement rate by product
-        fig2 = px.bar(df, x='product_name', y='engagement_rate',
-                     title='Engagement Rate by Product',
-                     labels={'engagement_rate': 'Engagement Rate (%)', 'product_name': 'Product'})
-        st.plotly_chart(fig2)
+        # Calculate engagement metrics
+        product_engagement = df.groupby('product_name').agg({
+            'engagement_rate': 'mean',  # Just using mean engagement rate
+            'view_count': 'sum',
+            'like_count': 'sum',
+            'comment_count': 'sum',
+            'video_title': 'count'
+        }).reset_index()
+        
+        # Sort products by engagement rate for better visualization
+        product_engagement = product_engagement.sort_values('engagement_rate', ascending=False)
+        
+        # Add detailed metrics table with improved formatting
+        st.write("### Detailed Engagement Metrics by Product")
+        detailed_metrics = product_engagement.rename(columns={
+            'engagement_rate': 'Engagement Rate (%)',
+            'view_count': 'Total Views',
+            'like_count': 'Total Likes',
+            'comment_count': 'Total Comments',
+            'video_title': 'Number of Videos'
+        })
+        
+        # Format the metrics table
+        formatted_metrics = detailed_metrics.style.format({
+            'Engagement Rate (%)': '{:.2f}%',
+            'Total Views': '{:,.0f}',
+            'Total Likes': '{:,.0f}',
+            'Total Comments': '{:,.0f}',
+            'Number of Videos': '{:,.0f}'
+        }).background_gradient(subset=['Engagement Rate (%)'], cmap='YlOrRd')
+        
+        st.dataframe(formatted_metrics)
 
     with tab2:
         st.subheader("Sentiment Analysis")
@@ -153,11 +198,26 @@ def analyze_video_trends(data):
                      title='Overall Sentiment Distribution')
         st.plotly_chart(fig3)
 
-        # Sentiment by product
-        fig4 = px.bar(df, x='product_name', color='sentiment',
-                     title='Sentiment Distribution by Product',
-                     barmode='group')
-        st.plotly_chart(fig4)
+        # Calculate sentiment counts for each product
+        sentiment_by_product = df.groupby(['product_name', 'sentiment']).size().reset_index(name='count')
+        
+        # Add detailed sentiment metrics table
+        st.write("### Detailed Sentiment Metrics by Product")
+        sentiment_metrics = sentiment_by_product.pivot(
+            index='product_name',
+            columns='sentiment',
+            values='count'
+        ).fillna(0)
+        
+        # Calculate total videos for each product
+        sentiment_metrics['Total Videos'] = sentiment_metrics.sum(axis=1)
+        
+        # Format the table
+        formatted_sentiment = sentiment_metrics.style.format({
+            'Total Videos': '{:.0f}'
+        }).background_gradient(cmap='YlOrRd')
+        
+        st.dataframe(formatted_sentiment)
 
     with tab3:
         st.subheader("Comment Analysis")
@@ -171,65 +231,123 @@ def analyze_video_trends(data):
         with col3:
             st.metric("Max Comments", df['comment_count'].max())
 
-        # Comment engagement ratio
-        df['comment_engagement_ratio'] = df['comment_count'] / df['view_count'] * 100
-        fig5 = px.bar(df, x='video_title', y='comment_engagement_ratio',
-                     title='Comment Engagement Ratio by Video',
-                     labels={'comment_engagement_ratio': 'Comment Engagement Ratio (%)', 
-                            'video_title': 'Video Title'})
-        fig5.update_layout(xaxis_tickangle=-45)
-        st.plotly_chart(fig5)
+        # Calculate detailed comment metrics by product
+        comment_metrics = df.groupby('product_name').agg({
+            'comment_count': ['sum', 'mean', 'max', 'count'],
+            'view_count': 'sum',
+            'like_count': 'sum'
+        }).reset_index()
+        
+        # Flatten column names
+        comment_metrics.columns = ['_'.join(col).strip('_') for col in comment_metrics.columns.values]
+        
+        # Rename columns for clarity
+        comment_metrics = comment_metrics.rename(columns={
+            'comment_count_sum': 'Total Comments',
+            'comment_count_mean': 'Avg Comments per Video',
+            'comment_count_max': 'Max Comments',
+            'comment_count_count': 'Number of Videos',
+            'view_count_sum': 'Total Views',
+            'like_count_sum': 'Total Likes'
+        })
+        
+        # Calculate comment engagement rate
+        comment_metrics['Comment Engagement Rate'] = (comment_metrics['Total Comments'] / comment_metrics['Total Views'] * 100).round(2)
+        
+        # Sort by total comments
+        comment_metrics = comment_metrics.sort_values('Total Comments', ascending=False)
+        
+        # Format the table
+        formatted_comment_metrics = comment_metrics.style.format({
+            'Total Comments': '{:,.0f}',
+            'Avg Comments per Video': '{:.2f}',
+            'Max Comments': '{:,.0f}',
+            'Number of Videos': '{:,.0f}',
+            'Total Views': '{:,.0f}',
+            'Total Likes': '{:,.0f}',
+            'Comment Engagement Rate': '{:.2f}%'
+        }).background_gradient(subset=['Comment Engagement Rate'], cmap='YlOrRd')
+        
+        st.write("### Detailed Comment Metrics by Product")
+        st.dataframe(formatted_comment_metrics)
 
     with tab4:
         st.subheader("Product Comparison")
         
-        # Aggregate metrics for products with multiple videos
-        agg_metrics = aggregate_product_metrics(df)
+        # Create comparison options
+        st.write("### Video Comparison")
         
-        # Display product comparison metrics
-        st.write("### Product Performance Metrics")
-        st.dataframe(agg_metrics)
+        # Get unique products
+        products = df['product_name'].unique()
         
-        # Create comparison visualizations
+        # Create two columns for selection
         col1, col2 = st.columns(2)
         
         with col1:
-            # Total engagement metrics by product
-            fig6 = go.Figure()
-            fig6.add_trace(go.Bar(name='Total Views', x=agg_metrics['product_name'], y=agg_metrics['total_views']))
-            fig6.add_trace(go.Bar(name='Total Likes', x=agg_metrics['product_name'], y=agg_metrics['total_likes']))
-            fig6.add_trace(go.Bar(name='Total Comments', x=agg_metrics['product_name'], y=agg_metrics['total_comments']))
+            st.write("Select First Video")
+            first_product = st.selectbox("Product 1", ['Select Product'] + list(products), key="first_product")
+            if first_product != 'Select Product':
+                first_videos = df[df['product_name'] == first_product]['video_title'].unique()
+                first_video = st.selectbox("Video 1", ['Select Video'] + list(first_videos), key="first_video")
+            else:
+                first_video = 'Select Video'
             
-            fig6.update_layout(title='Total Engagement by Product',
-                             barmode='group',
-                             xaxis_title='Product',
-                             yaxis_title='Count')
-            st.plotly_chart(fig6)
-        
         with col2:
-            # Average engagement metrics by product
-            fig7 = go.Figure()
-            fig7.add_trace(go.Bar(name='Avg Views', x=agg_metrics['product_name'], y=agg_metrics['avg_views']))
-            fig7.add_trace(go.Bar(name='Avg Likes', x=agg_metrics['product_name'], y=agg_metrics['avg_likes']))
-            fig7.add_trace(go.Bar(name='Avg Comments', x=agg_metrics['product_name'], y=agg_metrics['avg_comments']))
-            
-            fig7.update_layout(title='Average Engagement per Video by Product',
-                             barmode='group',
-                             xaxis_title='Product',
-                             yaxis_title='Average Count')
-            st.plotly_chart(fig7)
+            st.write("Select Second Video")
+            second_product = st.selectbox("Product 2", ['Select Product'] + list(products), key="second_product")
+            if second_product != 'Select Product':
+                second_videos = df[df['product_name'] == second_product]['video_title'].unique()
+                second_video = st.selectbox("Video 2", ['Select Video'] + list(second_videos), key="second_video")
+            else:
+                second_video = 'Select Video'
         
-        # Video count and engagement rate
-        fig8 = px.scatter(agg_metrics, 
-                         x='video_count', 
-                         y='avg_engagement_rate',
-                         size='total_views',
-                         color='product_name',
-                         title='Video Count vs Engagement Rate',
-                         labels={'video_count': 'Number of Videos',
-                                'avg_engagement_rate': 'Average Engagement Rate (%)',
-                                'total_views': 'Total Views'})
-        st.plotly_chart(fig8)
+        # Only show comparison if both videos are selected
+        if first_video != 'Select Video' and second_video != 'Select Video':
+            # Get selected video data
+            first_video_data = df[df['video_title'] == first_video].iloc[0]
+            second_video_data = df[df['video_title'] == second_video].iloc[0]
+            
+            # Create comparison metrics
+            metrics = [
+                ('Product Name', first_video_data['product_name'], second_video_data['product_name']),
+                ('Video Title', first_video_data['video_title'], second_video_data['video_title']),
+                ('Views', f"{first_video_data['view_count']:,}", f"{second_video_data['view_count']:,}"),
+                ('Likes', f"{first_video_data['like_count']:,}", f"{second_video_data['like_count']:,}"),
+                ('Comments', f"{first_video_data['comment_count']:,}", f"{second_video_data['comment_count']:,}"),
+                ('Engagement Rate', f"{first_video_data['engagement_rate']:.2f}%", f"{second_video_data['engagement_rate']:.2f}%"),
+                ('Publish Date', first_video_data['publish_date'].strftime('%Y-%m-%d'), second_video_data['publish_date'].strftime('%Y-%m-%d')),
+                ('Sentiment', first_video_data['sentiment'], second_video_data['sentiment'])
+            ]
+            
+            # Calculate differences
+            differences = []
+            for metric, val1, val2 in metrics:
+                if '%' in str(val1):
+                    diff = f"{float(val1.replace('%', '').replace(',', '')) - float(val2.replace('%', '').replace(',', '')):.2f}%"
+                elif str(val1).replace(',', '').replace('.', '').isdigit():
+                    diff = f"{int(val1.replace(',', '')) - int(val2.replace(',', '')):,}"
+                else:
+                    diff = 'N/A'
+                differences.append(diff)
+            
+            # Create comparison DataFrame
+            comparison_df = pd.DataFrame({
+                'Metric': [m[0] for m in metrics],
+                'Video 1': [m[1] for m in metrics],
+                'Video 2': [m[2] for m in metrics],
+                'Difference': differences
+            })
+            
+            # Format the comparison table
+            st.write("### Video Comparison Results")
+            st.dataframe(
+                comparison_df,
+                use_container_width=True,
+                hide_index=True,
+                height=400
+            )
+        else:
+            st.info("Please select both videos to see the comparison.")
 
     with tab5:
         st.subheader("Video Growth Analysis")
@@ -242,81 +360,156 @@ def analyze_video_trends(data):
             recent_changes = changes_df[changes_df['days_since_previous'] <= 30]
             
             if not recent_changes.empty:
-                st.write("### Recent Metric Changes (Last 30 Days)")
+                # Add video selection
+                st.write("### Select Video for Analysis")
                 
-                # Display changes in a table
-                st.dataframe(recent_changes[[
-                    'video_title', 'product_name', 'days_since_previous',
-                    'views_change', 'views_change_pct',
-                    'likes_change', 'likes_change_pct',
-                    'comments_change', 'comments_change_pct',
-                    'engagement_rate_change'
-                ]].round(2))
+                # Get unique products
+                products = recent_changes['product_name'].unique()
                 
-                # Create visualizations for metric changes
-                col1, col2 = st.columns(2)
+                # Product selection
+                selected_product = st.selectbox(
+                    "Select Product",
+                    ['All Products'] + list(products),
+                    key="growth_product"
+                )
                 
-                with col1:
-                    # Views growth over time
-                    fig9 = px.bar(recent_changes,
-                                x='video_title',
-                                y='views_change_pct',
-                                title='Views Growth Rate (%)',
-                                labels={'views_change_pct': 'Views Growth (%)',
-                                       'video_title': 'Video Title'})
-                    fig9.update_layout(xaxis_tickangle=-45)
-                    st.plotly_chart(fig9)
+                # Filter videos based on selected product
+                if selected_product != 'All Products':
+                    filtered_changes = recent_changes[recent_changes['product_name'] == selected_product]
+                    videos = filtered_changes['video_title'].unique()
+                else:
+                    filtered_changes = recent_changes
+                    videos = filtered_changes['video_title'].unique()
                 
-                with col2:
-                    # Engagement rate changes
-                    fig10 = px.bar(recent_changes,
-                                 x='video_title',
-                                 y='engagement_rate_change',
-                                 title='Engagement Rate Change',
-                                 labels={'engagement_rate_change': 'Engagement Rate Change (%)',
-                                        'video_title': 'Video Title'})
-                    fig10.update_layout(xaxis_tickangle=-45)
-                    st.plotly_chart(fig10)
+                # Video selection
+                selected_videos = st.multiselect(
+                    "Select Videos to Compare",
+                    videos,
+                    default=videos[:2] if len(videos) > 1 else videos[:1],
+                    key="growth_videos"
+                )
                 
-                # Growth trends
-                st.write("### Growth Trends")
-                
-                # Calculate average daily growth rates
-                recent_changes['daily_views_growth'] = recent_changes['views_change'] / recent_changes['days_since_previous']
-                recent_changes['daily_likes_growth'] = recent_changes['likes_change'] / recent_changes['days_since_previous']
-                recent_changes['daily_comments_growth'] = recent_changes['comments_change'] / recent_changes['days_since_previous']
-                
-                # Plot daily growth rates
-                fig11 = go.Figure()
-                fig11.add_trace(go.Bar(name='Views/Day', x=recent_changes['video_title'], 
-                                     y=recent_changes['daily_views_growth']))
-                fig11.add_trace(go.Bar(name='Likes/Day', x=recent_changes['video_title'], 
-                                     y=recent_changes['daily_likes_growth']))
-                fig11.add_trace(go.Bar(name='Comments/Day', x=recent_changes['video_title'], 
-                                     y=recent_changes['daily_comments_growth']))
-                
-                fig11.update_layout(title='Average Daily Growth Rates',
-                                  barmode='group',
-                                  xaxis_title='Video Title',
-                                  yaxis_title='Average Daily Growth',
-                                  xaxis_tickangle=-45)
-                st.plotly_chart(fig11)
-                
-                # Projected growth
-                st.write("### Projected Growth (Next 7 Days)")
-                
-                # Calculate projected metrics
-                projections = recent_changes.copy()
-                projections['projected_views'] = projections['current_views'] + (projections['daily_views_growth'] * 7)
-                projections['projected_likes'] = projections['current_likes'] + (projections['daily_likes_growth'] * 7)
-                projections['projected_comments'] = projections['current_comments'] + (projections['daily_comments_growth'] * 7)
-                
-                # Display projections
-                st.dataframe(projections[[
-                    'video_title', 'current_views', 'projected_views',
-                    'current_likes', 'projected_likes',
-                    'current_comments', 'projected_comments'
-                ]].round(0))
+                if selected_videos:
+                    # Filter data for selected videos
+                    filtered_changes = filtered_changes[filtered_changes['video_title'].isin(selected_videos)]
+                    
+                    st.write("### Time Series Trends")
+                    
+                    # Views trend
+                    st.write("#### Views Trend Over Time")
+                    max_views = filtered_changes['current_views'].max()
+                    fig_views = go.Figure()
+                    
+                    # Add data points
+                    for video in selected_videos:
+                        video_data = filtered_changes[
+                            (filtered_changes['video_title'] == video) & 
+                            (filtered_changes['product_name'] == selected_product)
+                        ]
+                        if not video_data.empty:
+                            fig_views.add_trace(go.Scatter(
+                                x=video_data['analysis_date'],
+                                y=video_data['current_views'],
+                                name=f"{video} ({selected_product})",
+                                mode='lines+markers',
+                                marker=dict(size=8)
+                            ))
+                    
+                    fig_views.update_layout(
+                        showlegend=True,
+                        height=400,
+                        yaxis=dict(
+                            title="Views",
+                            tickformat=",d",
+                            range=[0, max_views * 1.1]
+                        ),
+                        xaxis=dict(
+                            title="Date"
+                        )
+                    )
+                    st.plotly_chart(fig_views, use_container_width=True)
+                    
+                    # Likes trend
+                    st.write("#### Likes Trend Over Time")
+                    max_likes = filtered_changes['current_likes'].max()
+                    fig_likes = go.Figure()
+                    
+                    # Add data points
+                    for video in selected_videos:
+                        video_data = filtered_changes[
+                            (filtered_changes['video_title'] == video) & 
+                            (filtered_changes['product_name'] == selected_product)
+                        ]
+                        if not video_data.empty:
+                            fig_likes.add_trace(go.Scatter(
+                                x=video_data['analysis_date'],
+                                y=video_data['current_likes'],
+                                name=f"{video} ({selected_product})",
+                                mode='lines+markers',
+                                marker=dict(size=8)
+                            ))
+                    
+                    fig_likes.update_layout(
+                        showlegend=True,
+                        height=400,
+                        yaxis=dict(
+                            title="Likes",
+                            tickformat=",d",
+                            range=[0, max_likes * 1.1]
+                        ),
+                        xaxis=dict(
+                            title="Date"
+                        )
+                    )
+                    st.plotly_chart(fig_likes, use_container_width=True)
+                    
+                    # Comments trend
+                    st.write("#### Comments Trend Over Time")
+                    max_comments = filtered_changes['current_comments'].max()
+                    fig_comments = go.Figure()
+                    
+                    # Add data points
+                    for video in selected_videos:
+                        video_data = filtered_changes[
+                            (filtered_changes['video_title'] == video) & 
+                            (filtered_changes['product_name'] == selected_product)
+                        ]
+                        if not video_data.empty:
+                            fig_comments.add_trace(go.Scatter(
+                                x=video_data['analysis_date'],
+                                y=video_data['current_comments'],
+                                name=f"{video} ({selected_product})",
+                                mode='lines+markers',
+                                marker=dict(size=8)
+                            ))
+                    
+                    fig_comments.update_layout(
+                        showlegend=True,
+                        height=400,
+                        yaxis=dict(
+                            title="Comments",
+                            tickformat=",d",
+                            range=[0, max_comments * 1.1]
+                        ),
+                        xaxis=dict(
+                            title="Date"
+                        )
+                    )
+                    st.plotly_chart(fig_comments, use_container_width=True)
+                    
+                    # Display the raw data
+                    st.write("### Raw Growth Data")
+                    st.dataframe(filtered_changes[[
+                        'video_title',
+                        'product_name',
+                        'analysis_date',
+                        'current_views',
+                        'current_likes',
+                        'current_comments',
+                        'days_since_previous'
+                    ]].sort_values('analysis_date', ascending=False))
+                else:
+                    st.info("Please select at least one video to view the analysis.")
             else:
                 st.info("No recent changes detected in the last 30 days.")
         else:
