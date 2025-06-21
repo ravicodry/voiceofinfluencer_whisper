@@ -184,7 +184,7 @@ def analyze_video_trends(data):
             'Total Likes': '{:,.0f}',
             'Total Comments': '{:,.0f}',
             'Number of Videos': '{:,.0f}'
-        }).background_gradient(subset=['Engagement Rate (%)'], cmap='YlOrRd')
+        })
         
         st.dataframe(formatted_metrics)
 
@@ -215,7 +215,7 @@ def analyze_video_trends(data):
         # Format the table
         formatted_sentiment = sentiment_metrics.style.format({
             'Total Videos': '{:.0f}'
-        }).background_gradient(cmap='YlOrRd')
+        })
         
         st.dataframe(formatted_sentiment)
 
@@ -266,7 +266,7 @@ def analyze_video_trends(data):
             'Total Views': '{:,.0f}',
             'Total Likes': '{:,.0f}',
             'Comment Engagement Rate': '{:.2f}%'
-        }).background_gradient(subset=['Comment Engagement Rate'], cmap='YlOrRd')
+        })
         
         st.write("### Detailed Comment Metrics by Product")
         st.dataframe(formatted_comment_metrics)
