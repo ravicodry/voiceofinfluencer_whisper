@@ -47,4 +47,5 @@ temp/
 .DS_Store
 Thumbs.db
 
-segment_product_reviews.jason
+# Data files (if you want to ignore specific data files)
+# segment_product_reviews.json
